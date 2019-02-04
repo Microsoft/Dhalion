@@ -69,6 +69,15 @@ public interface IHealthPolicy {
   Collection<Action> executeResolvers(Collection<Diagnosis> diagnosis);
 
   /**
+   * Invoked in the event that the policy should be overridden, this method executes one {@link IResolver} to fix a
+   * single identified issue.
+   *
+   * @param resolver a resolver to be executed
+   * @return actions executed to mitigate health issues
+   */
+  Collection<Action> executeResolver(IResolver resolver);
+
+  /**
    * @return the remaining delay before re-execution of this policy
    */
   Duration getDelay();

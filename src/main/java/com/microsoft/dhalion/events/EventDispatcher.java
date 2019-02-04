@@ -15,7 +15,7 @@ public class EventDispatcher<T> implements EventHandler<T> {
 
   public synchronized void addHandler(EventHandler<T> handler) {
     if (handlers.contains(handler)) {
-      throw new IllegalArgumentException("Duplicate hanlder registration");
+      throw new IllegalArgumentException("Duplicate handler registration");
     }
     handlers.add(handler);
   }

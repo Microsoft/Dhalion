@@ -37,6 +37,15 @@ public interface IResolver {
   /**
    * Triggers execution of {@link Action}s which are expected to improved system health.
    *
+   * @return all the actions executed by this resolver
+   */
+  default Collection<Action> resolve() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Triggers execution of {@link Action}s which are expected to improved system health.
+   *
    * @param diagnosis recently identified likely-causes of the observed {@link Symptom}s
    * @return all the actions executed by this resolver to mitigate the problems
    */

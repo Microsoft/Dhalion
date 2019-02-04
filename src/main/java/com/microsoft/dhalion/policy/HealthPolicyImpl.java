@@ -166,6 +166,24 @@ public class HealthPolicyImpl implements IHealthPolicy {
   }
 
   @Override
+  public Collection<Action> executeResolver(IResolver resolver) {
+    if (oneTimeDelay != null && !oneTimeDelay.isAfter(clock.now())) {
+      // reset one time delay timestamp
+      oneTimeDelay = null;
+    }
+
+    Collection<Action> actions = new ArrayList<>();
+    if (!resolvers.contains(resolver)) {
+      return actions;
+    }
+
+    actions = resolver.resolve();
+
+    lastExecutionTimestamp = clock.now();
+    return actions;
+  }
+
+  @Override
   public Duration getDelay() {
     long delay;
     if (lastExecutionTimestamp == null) {
