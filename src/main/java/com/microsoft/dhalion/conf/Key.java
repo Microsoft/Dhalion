@@ -15,12 +15,12 @@ public enum Key {
   POLICY_CONF_SENSOR_DURATION_SUFFIX(".duration"),
   CONF_COMPONENT_NAMES("component.names"),
 
-
+  BOOTSTRAP_MODULE_CLASS("bootstrap.module.class", "com.microsoft.dhalion.IBootstrapModule$DefaultModule"),
   METRICS_PROVIDER_CLASS("metrics.provider.class");
 
   private final String value;
   private final Object defaultValue;
-
+  
   Key(String value) {
     this(value, null);
   }

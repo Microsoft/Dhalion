@@ -101,15 +101,27 @@ public class HealthManager {
 
     cb.loadConfig(conf).loadPolicyConf();
     config = cb.build();
-
-    //Read the MetricsProvider class
-    String metricsProviderClass = (String) conf.get(Key.METRICS_PROVIDER_CLASS.value());
-    Class<MetricsProvider> mpClass
-        = (Class<MetricsProvider>) this.getClass().getClassLoader().loadClass(metricsProviderClass);
     injector = injector.createChildInjector(new AbstractModule() {
       @Override
       protected void configure() {
         bind(Config.class).toInstance(config);
+      }
+    });
+    
+    //Register additional bindings
+    String bootstrapModuleClassName = (String) conf.get(Key.BOOTSTRAP_MODULE_CLASS.value());
+    Class<IBootstrapModule> bootstrapModuleClass = loadClass(bootstrapModuleClassName);
+    IBootstrapModule bootstrapModule = injector.getInstance(bootstrapModuleClass);
+
+    injector = injector.createChildInjector(bootstrapModule.get());
+
+    //Read the MetricsProvider class
+    String metricsProviderClass = (String) conf.get(Key.METRICS_PROVIDER_CLASS.value());
+    Class<MetricsProvider> mpClass = loadClass(metricsProviderClass);
+
+    injector = injector.createChildInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
         bind(mpClass).in(Singleton.class);
       }
     });
@@ -131,14 +143,18 @@ public class HealthManager {
     for (PolicyConfig policyConf : config.policies()) {
       String policyClassName = policyConf.policyClass();
       LOG.info(String.format("Initializing %s with class %s", policyConf.id(), policyClassName));
-      Class<IHealthPolicy> policyClass
-          = (Class<IHealthPolicy>) this.getClass().getClassLoader().loadClass(policyClassName);
+      Class<IHealthPolicy> policyClass = loadClass(policyClassName);
 
       AbstractModule module = constructPolicySpecificModule(policyConf);
       IHealthPolicy policy = injector.createChildInjector(module).getInstance(policyClass);
 
       healthPolicies.add(policy);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private <T> Class<T> loadClass(String className) throws ClassNotFoundException {
+      return (Class<T>) this.getClass().getClassLoader().loadClass(className);
   }
 
   private AbstractModule constructPolicySpecificModule(final PolicyConfig policyConfig) {
